@@ -1,8 +1,10 @@
 
 //Variable para almacenar constantes 
-var CONS = {
-		
-		SERVER_URL : 'http://spotube.com:8081/MusicOn/'
+var Cons = {
+		SERVER_URL : 'http://spotube.com:8081/MusicOn/',
+		EVALUATE_URL : 'http://mp3-island.in/site/evaluate',
+		WAIT_IMG_URL : 'http://mp3-island.in/images/wait.gif',
+		ERROR_IMG_URL : 'http://mp3-island.in/images/error.png'
 };
 
 
@@ -43,7 +45,7 @@ function searchSongs( query  ) {
 
 	yqlQuery(site, function(data){
 		  if ( data.results[0] ) {
-				$('#songList > tbody').html('');
+			$('#songList').find('td').remove();
 		  	// Strip out all script tags, for security reasons.
 		  	// BE VERY CAREFUL. This helps, but we should do more.
 		  	data = data.results[0].replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
@@ -61,19 +63,58 @@ function searchSongs( query  ) {
 		  		var input = $('<td>').append($('<input>', {type:'checkbox', value:songId}));
 		  		var title = $('<td>').html($(tds[1]).html());
 		  		var artist = $('<td>').html($(tds[2]).html());
-		  		var quality = $('<td>', {id:songId})
+		  		var quality = $('<td>', {id:'quality_' + songId})
 		  		var tr = $('<tr>').append(input).append(title).append(artist).append(quality);
 		  		$('#songList > table').append(tr);
 		  		
-		  		//lanzamos una consulta para cada canción para obtener su calidad ;)
-		  		$.post('http://www.mp3-island.in/site/evaluate', {id:songId}, function(data) {
-		  			console.log(data);
-		  		});
+				getQuality(songId);
 		  	});
 		  	
 		  }
 	  });
 }
+
+function getQuality(id){
+		$('#quality_'+ id).html('<img src="'+Cons.WAIT_IMG_URL+'" />');
+		/*
+		$.ajax({
+			type:"POST",
+			crossDomain: true,
+			dataType: 'json',
+			url:Cons.EVALUATE_URL,data:{id:id},
+				success: function(responseData, textStatus, jqXHR) {
+					alert(responseData);
+					var result = responseData.someKey;
+					if(result==0){
+						$('#quality_'+ id).html('<img src="'+Cons.ERROR_IMG_URL+'" />');
+					}else{
+						$('#quality_'+ id).html('<img src="'+result+'" />');}					
+					},
+				error: function (responseData, textStatus, errorThrown) {
+					console.log('POST failed.');
+				}			
+			});
+		*/
+		// Add the iframe with a unique name
+		var form = $('<form/>', {id:id, action:Cons.EVALUATE_URL, method:'POST'}).appendTo('body');
+		form.append($('<input/>', {type:'hidden', name:'id', value:id}));
+		form.ajaxForm({
+			type: 'POST',
+			dataType: 'jsonp',
+			success: function(responseText, statusText, xhr, $form) { 
+				alert(responseText);
+				$form.remove();
+			},
+			error: function(obj) {  
+				console.log(obj);
+			}
+		});
+		
+		form.submit();
+		
+		
+}
+
 
 /**
  * Muestra mensaje por pantalla que desaparece automáticamente
