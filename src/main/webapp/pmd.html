@@ -45,31 +45,54 @@
      	</div>
   	</div>
   	
+  	
+  	
   	<div id="songList" class="container">
-			<table class="table table-bordered table-striped">
-        <thead>
-          <tr>
-          	<th>&nbsp</th>
-            <th>Song</th>
-            <th>Artist</th>
-            <th>Quality</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>  
-      </table>        
+  		<button id="downloadButton" type="button" class="btn btn-default">Download Selected</button>
+		<table class="table table-bordered table-striped">
+			<thead>
+			  <tr>
+			  	<th><input id="checkAll" type="checkbox"></th>
+			    <th>Song</th>
+			    <th>Artist</th>
+			    <th>Quality</th>
+			  </tr>
+			</thead>
+			<tbody>
+			</tbody>  
+		</table>        
   	</div>
   	
     <script src="http://code.jquery.com/jquery.js"></script>
     <script src="js/app.util.js"></script>
     <script src="js/bootstrap.min.js"></script>
-	<script src="js/jquery.form.min.js"></script>
-	
     
     
     <script type="text/javascript">
-    	
     	$(function() {
+    		
+    		$('#checkAll').click(function() {
+    			if ($(this).is(":checked")) {
+    				console.log('checked')
+    				$('input:checkbox').attr('checked', true);
+    			} else {
+    				$("input:checkbox").removeAttr('checked');
+    				//$('input:checkbox').attr('checked', false);
+    			}
+    			
+    		});
+    		
+    		$('#downloadButton').click(function(e) {
+    			console.log('entra '+$('input[class=check-song]:checked').length);
+    			$('input[class=check-song]:checked').each(function(index, obj) {
+    				var data = $(obj).data('data');
+    				console.log(data);
+    				downloadSong(data);
+    			    //selected.push($(this).attr('name'));
+    			});
+    			e.preventDefault();
+    		});
+    		
     		$('#searchForm').on('submit', function(e) {
     			var query = $(this).find('input').val();
     			if (query.trim()) {
@@ -77,8 +100,7 @@
     			}
     			e.preventDefault();
     		});
-			});
-    	
+		});
     	</script>
   </body>
 </html>

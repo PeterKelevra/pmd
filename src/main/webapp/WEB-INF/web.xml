@@ -13,7 +13,7 @@
 
 	<servlet-mapping>
 		<servlet-name>mvc-dispatcher</servlet-name>
-		<url-pattern>/*</url-pattern>
+		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
 	<context-param>
@@ -24,5 +24,10 @@
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
+	
+	<welcome-file-list>
+        <welcome-file>pmd.html</welcome-file>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>	
 
 </web-app>

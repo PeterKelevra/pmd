@@ -2,9 +2,10 @@
 //Variable para almacenar constantes 
 var Cons = {
 		SERVER_URL : 'http://spotube.com:8081/MusicOn/',
-		EVALUATE_URL : 'http://mp3-island.in/site/evaluate',
-		WAIT_IMG_URL : 'http://mp3-island.in/images/wait.gif',
-		ERROR_IMG_URL : 'http://mp3-island.in/images/error.png'
+		QUALITY_URL : 'quality/',
+		DOWNLOAD_URL : 'download',
+		WAIT_IMG_URL : 'images/wait.gif',
+		ERROR_IMG_URL : 'images/error.png'
 };
 
 
@@ -60,14 +61,19 @@ function searchSongs( query  ) {
 		  	$.each(songsTr, function(index, obj){
 		  		var tds = $(obj).find('td');
 		  		var songId = $(tds[3]).attr('id').replace('quality_', '');
-		  		var input = $('<td>').append($('<input>', {type:'checkbox', value:songId}));
-		  		var title = $('<td>').html($(tds[1]).html());
-		  		var artist = $('<td>').html($(tds[2]).html());
-		  		var quality = $('<td>', {id:'quality_' + songId})
-		  		var tr = $('<tr>').append(input).append(title).append(artist).append(quality);
+		  		var songTitle = $(tds[1]).html();
+		  		var songArtist = $(tds[2]).html();
+		  		var checkbox = $('<input>', {type:'checkbox', 'class':'check-song', value:songId});
+		  		var input = $('<td>').append(checkbox);
+		  		var title = $('<td>').html(songTitle);
+		  		var artist = $('<td>').html(songArtist);
+		  		var quality = $('<td>', {id:'quality_' + songId});
+		  		var tr = $('<tr>', {id:'tr_' + songId}).append(input).append(title).append(artist).append(quality);
 		  		$('#songList > table').append(tr);
 		  		
-				getQuality(songId);
+		  		checkbox.data('data', {id:songId, title:songTitle, artist:songArtist});
+		  		
+				//getQuality(songId);
 		  	});
 		  	
 		  }
@@ -75,49 +81,28 @@ function searchSongs( query  ) {
 }
 
 function getQuality(id){
-		$('#quality_'+ id).html('<img src="'+Cons.WAIT_IMG_URL+'" />');
-		/*
-		$.ajax({
-			type:"POST",
-			crossDomain: true,
-			dataType: 'json',
-			url:Cons.EVALUATE_URL,data:{id:id},
-				success: function(responseData, textStatus, jqXHR) {
-					alert(responseData);
-					var result = responseData.someKey;
-					if(result==0){
-						$('#quality_'+ id).html('<img src="'+Cons.ERROR_IMG_URL+'" />');
-					}else{
-						$('#quality_'+ id).html('<img src="'+result+'" />');}					
-					},
-				error: function (responseData, textStatus, errorThrown) {
-					console.log('POST failed.');
-				}			
-			});
-		*/
-		// Add the iframe with a unique name
-		var form = $('<form/>', {id:id, action:Cons.EVALUATE_URL, method:'POST'}).appendTo('body');
-		form.append($('<input/>', {type:'hidden', name:'id', value:id}));
-		form.ajaxForm({
-			type: 'POST',
-			dataType: 'jsonp',
-			success: function(responseText, statusText, xhr, $form) { 
-				alert(responseText);
-				$form.remove();
-			},
-			error: function(obj) {  
-				console.log(obj);
-			}
-		});
-		
-		form.submit();
-		
-		
+	$('#quality_'+ id).html('<img src="' + Cons.WAIT_IMG_URL + '" />');
+	
+	$.get(Cons.QUALITY_URL+id, function (data){
+		if(data){
+			$('#quality_' + id).html('<img src="' + data + '" />');
+		}else{
+			$('#quality_' + id).html('<img src="' + Cons.ERROR_IMG_URL + '" />');					
+		}
+	});
+}
+
+function downloadSong(params){
+	$.get(Cons.DOWNLOAD_URL, {id:params.id, data:JSON.stringify(params)}, function (data){
+		if(data){
+			console.log(data);
+		}
+	});
 }
 
 
 /**
- * Muestra mensaje por pantalla que desaparece autom√°ticamente
+ * Muestra mensaje por pantalla que desaparece autom·ticamente
  * @param msg
  */
 function alertMsg(msg) {
